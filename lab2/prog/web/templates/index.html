@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Решение нелинейных уравнений и систем</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    function toggleSections() {
+      var taskType = document.querySelector('input[name="task_type"]:checked').value;
+      if (taskType == "1") {
+        document.getElementById("equation_section").style.display = "block";
+        document.getElementById("system_section").style.display = "none";
+      } else if (taskType == "2") {
+        document.getElementById("equation_section").style.display = "none";
+        document.getElementById("system_section").style.display = "block";
+      }
+    }
+    
+    function handleFileInput(event, fields) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const contents = e.target.result;
+        const lines = contents.split(/\r?\n/).filter(line => line.trim() !== "");
+        if(lines.length >= 3) {
+          fields.forEach((field, index) => {
+            document.getElementById(field).value = lines[index].trim();
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    window.onload = function() {
+      toggleSections();
+      var radios = document.getElementsByName("task_type");
+      for (var i = 0; i < radios.length; i++){
+          radios[i].addEventListener('change', toggleSections);
+      }
+      
+      document.getElementById("fileInputEquation").addEventListener("change", function(event) {
+          handleFileInput(event, ["a", "b", "eps"]);
+      });
+      document.getElementById("fileInputSystem").addEventListener("change", function(event) {
+          handleFileInput(event, ["x0", "y0", "eps_system"]);
+      });
+      
+      // Ограничение ввода: разрешаем ввод только цифр, точки, минуса, плюса и букв e/E
+      const numericFields = ["a", "b", "x0", "y0", "eps", "eps_system"];
+      numericFields.forEach(function(fieldId) {
+        var field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener("keypress", function(e) {
+            // Если вводится одиночный символ, проверяем, является ли он буквой
+            if (e.key.length === 1 && /[a-zA-Z]/.test(e.key) && e.key !== 'e' && e.key !== 'E') {
+              e.preventDefault();
+            }
+          });
+        }
+      });
+      
+      // Проверка, что a <= b при отправке формы (для задачи "Нелинейное уравнение")
+      document.querySelector("form").addEventListener("submit", function(e) {
+        if(document.getElementById("equation_section").style.display !== "none"){
+          var aVal = document.getElementById("a").value;
+          var bVal = document.getElementById("b").value;
+          var a = parseFloat(aVal);
+          var b = parseFloat(bVal);
+          if(isNaN(a) || isNaN(b)) {
+            alert("Ошибка: Введите числовые значения для a и b.");
+            e.preventDefault();
+          } else if(a > b) {
+            alert("Ошибка: a должно быть меньше или равно b.");
+            e.preventDefault();
+          }
+        }
+      });
+    }
+  </script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-8">Решение нелинейных уравнений и систем</h1>
+    <form action="{{ url_for('result') }}" method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Выберите тип задачи:</h2>
+        <div class="flex items-center mb-2">
+          <input type="radio" id="equation" name="task_type" value="1" checked class="mr-2">
+          <label for="equation" class="text-gray-700">Нелинейное уравнение</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" id="system" name="task_type" value="2" class="mr-2">
+          <label for="system" class="text-gray-700">Система нелинейных уравнений</label>
+        </div>
+      </div>
+
+      <div id="equation_section">
+        <h3 class="text-lg font-semibold mb-2">Выберите функцию:</h3>
+        <div class="mb-4">
+          <div class="flex items-center mb-1">
+            <input type="radio" id="f1" name="function_choice" value="1" checked class="mr-2">
+            <label for="f1" class="text-gray-700">\(x^3 - 2x - 5\)</label>
+          </div>
+          <div class="flex items-center mb-1">
+            <input type="radio" id="f2" name="function_choice" value="2" class="mr-2">
+            <label for="f2" class="text-gray-700">\(e^x - 2x - 2\)</label>
+          </div>
+          <div class="flex items-center mb-1">
+            <input type="radio" id="f3" name="function_choice" value="3" class="mr-2">
+            <label for="f3" class="text-gray-700">\(\sin(x) + 0.5\)</label>
+          </div>
+          <div class="flex items-center">
+            <input type="radio" id="f4" name="function_choice" value="4" class="mr-2">
+            <label for="f4" class="text-gray-700">\(x^2 - 2\)</label>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="a" class="text-gray-700">Введите a:</label>
+          <input type="text" id="a" name="a" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="b" class="text-gray-700">Введите b:</label>
+          <input type="text" id="b" name="b" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="eps" class="text-gray-700">Введите точность <span class="inline-block">\( \varepsilon \)</span>:</label>
+          <input type="text" id="eps" name="eps" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="fileInputEquation" class="block text-gray-700">Или загрузите значения из файла:</label>
+          <input type="file" id="fileInputEquation" name="fileInputEquation" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+      </div>
+
+      <div id="system_section" style="display:none;">
+        <h3 class="text-lg font-semibold mb-2">Выберите систему уравнений:</h3>
+        <div class="mb-4">
+          {% for key, system in systems.items() %}
+          <div class="flex items-center mb-1">
+            <input type="radio" id="system{{ key }}" name="system_choice" value="{{ key }}" {% if loop.first %}checked{% endif %} class="mr-2">
+            <label for="system{{ key }}" class="text-gray-700">{{ system.description | safe }}</label>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mb-4">
+          <label for="x0" class="block text-gray-700">Введите начальное приближение <span class="inline-block">\(x_0\)</span>:</label>
+          <input type="text" id="x0" name="x0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="y0" class="block text-gray-700">Введите начальное приближение <span class="inline-block">\(y_0\)</span>:</label>
+          <input type="text" id="y0" name="y0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="eps_system" class="block text-gray-700">Введите точность <span class="inline-block">\( \varepsilon \)</span>:</label>
+          <input type="text" id="eps_system" name="eps_system" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div class="mb-4">
+          <label for="fileInputSystem" class="block text-gray-700">Или загрузите значения из файла:</label>
+          <input type="file" id="fileInputSystem" name="fileInputSystem" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+      </div>
+      <div class="flex justify-center">
+        <input type="submit" value="Рассчитать" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      </div>
+    </form>
+  </div>
+</body>
+</html>

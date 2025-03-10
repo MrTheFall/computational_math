@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Результаты вычислений</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Подключение MathJax -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-8">Результаты вычислений</h1>
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8">
+      {% if result.error %}
+        <p class="text-red-500 font-semibold">{{ result.error }}</p>
+      {% else %}
+        {% if result.analysis_message %}
+          <p class="mb-4"><strong>Анализ интервала:</strong> {{ result.analysis_message }}</p>
+        {% endif %}
+        {% if result.chord %}
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Метод хорд</h2>
+            <p>Итераций: {{ result.chord.iterations }}</p>
+            <p>Корень: <span class="inline-block">\({{ result.chord.root }}\)</span></p>
+            <p><span class="inline-block">\(f(x): {{ result.chord.f_value }}\)</span></p>
+          </div>
+        {% endif %}
+        {% if result.newton %}
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Метод Ньютона</h2>
+            <p>Итераций: {{ result.newton.iterations }}</p>
+            <p>Корень: <span class="inline-block">\({{ result.newton.root }}\)</span></p>
+            <p><span class="inline-block">\(f(x): {{ result.newton.f_value }}\)</span></p>
+          </div>
+        {% endif %}
+        {% if result.simple_iteration %}
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Метод простой итерации</h2>
+            <p>Итераций: {{ result.simple_iteration.iterations }}</p>
+            <p>Корень: <span class="inline-block">\({{ result.simple_iteration.root }}\)</span></p>
+            <p><span class="inline-block">\(f(x): {{ result.simple_iteration.f_value }}\)</span></p>
+          </div>
+        {% endif %}
+        {% if result.chord_error %}
+          <p class="text-red-500 mb-4">Ошибка метода хорд: {{ result.chord_error }}</p>
+        {% endif %}
+        {% if result.newton_error %}
+          <p class="text-red-500 mb-4">Ошибка метода Ньютона: {{ result.newton_error }}</p>
+        {% endif %}
+        {% if result.simple_iteration_error %}
+          <p class="text-red-500 mb-4">Ошибка метода простой итерации: {{ result.simple_iteration_error }}</p>
+        {% endif %}
+        {% if result.jacobian_norm is defined %}
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Решение системы уравнений</h2>
+            <p>Норма матрицы Якоби: \({{ result.jacobian_norm }}\)</p>
+            <p>{{ result.jacobian_warning }}</p>
+          </div>
+        {% endif %}
+        {% if result.system %}
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-2">Метод простых итераций для системы</h3>
+            <p>Итераций: {{ result.system.iterations }}</p>
+            <p>\(x = {{ result.system.x }},\quad y = {{ result.system.y }}\)</p>
+          </div>
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-2">Проверка решения</h3>
+            <p>\(f_1(x,y) = {{ result.check.f1 }}\)</p>
+            <p>\(f_2(x,y) = {{ result.check.f2 }}\)</p>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Погрешности по итерациям</h3>
+            <ul class="list-disc pl-5">
+              {% for dx, dy in result.system.errors %}
+                <li>\(\Delta x = {{ dx }}, \quad \Delta y = {{ dy }}\)</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% if result.system_error %}
+          <p class="text-red-500 font-semibold">{{ result.system_error }}</p>
+        {% endif %}
+      {% endif %}
+      {% if result.plot %}
+        <div class="mt-6">
+          <h2 class="text-xl font-semibold mb-2">График функции</h2>
+          <img src="data:image/png;base64,{{ result.plot }}" alt="График функции">
+        </div>
+      {% endif %}
+      {% if result.system_plot %}
+        <div class="mt-6">
+          <h2 class="text-xl font-semibold mb-2">График сходимости итераций системы</h2>
+          <img src="data:image/png;base64,{{ result.system_plot }}" alt="График сходимости системы">
+        </div>
+      {% endif %}
+      <div class="mt-6">
+        <a href="{{ url_for('index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Вернуться к вводу</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
