@@ -60,8 +60,6 @@ def analyze_interval(f, f_prime, a, b):
     return True, "Интервал корректен"
 
 def chord_method(f, a, b, eps, max_iter=1000):
-    if not has_root(f, a, b):
-        raise ValueError("Нет корней на интервале")
     fa, fb = f(a), f(b)
     iterations = 0
     for _ in range(max_iter):
@@ -135,8 +133,7 @@ systems = {
 def simple_iteration_system(g1, g2, x0, y0, eps, max_iter=1000):
     iterations = 0
     x_prev, y_prev = x0, y0
-    errors = []  # Список для хранения погрешностей
-    print(x_prev,y_prev)
+    errors = []
     for _ in range(max_iter):
         x_new = g1(x_prev, y_prev)
         y_new = g2(x_prev, y_prev)
