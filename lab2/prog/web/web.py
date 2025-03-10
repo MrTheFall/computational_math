@@ -7,7 +7,6 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Функции для одиночных уравнений
 def f1(x):
     return x**3 - 2*x - 5
 
@@ -104,7 +103,7 @@ def simple_iteration_method(f, f_prime, a, b, eps, max_iter=1000):
     else:
         raise ValueError("Производная меняет знак на интервале, метод может не сходиться")
 
-    x_prev = (a + b) / 2.0  # Начальное приближение
+    x_prev = (a + b) / 2.0
     for i in range(max_iter):
         x_new = x_prev + lambda_ * f(x_prev)
         if abs(x_new - x_prev) < eps:
@@ -145,8 +144,6 @@ def simple_iteration_system(g1, g2, x0, y0, eps, max_iter=1000):
             return (x_new, y_new), iterations, errors
         x_prev, y_prev = x_new, y_new
     return (x_prev, y_prev), iterations, errors
-
-# Маршруты приложения
 
 @app.route('/', methods=['GET'])
 def index():

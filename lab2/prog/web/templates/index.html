@@ -48,7 +48,6 @@
           handleFileInput(event, ["x0", "y0", "eps_system"]);
       });
       
-      // Ограничение ввода: разрешаем ввод только цифр, точки, минуса, плюса и букв e/E
       const numericFields = ["a", "b", "x0", "y0", "eps", "eps_system"];
       numericFields.forEach(function(fieldId) {
         var field = document.getElementById(fieldId);
@@ -62,7 +61,6 @@
         }
       });
       
-      // Проверка, что a <= b при отправке формы (для задачи "Нелинейное уравнение")
       document.querySelector("form").addEventListener("submit", function(e) {
         if(document.getElementById("equation_section").style.display !== "none"){
           var aVal = document.getElementById("a").value;
