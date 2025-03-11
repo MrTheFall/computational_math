@@ -157,9 +157,9 @@ def result():
     if task_type == "1":
         func_choice = request.form.get("function_choice")
         try:
-            a = float(request.form.get("a"))
-            b = float(request.form.get("b"))
-            eps = float(request.form.get("eps"))
+            a = float(request.form.get("a").replace(',', '.'))
+            b = float(request.form.get("b").replace(',', '.'))
+            eps = float(request.form.get("eps").replace(',', '.'))
         except ValueError:
             result_data['error'] = "Некорректный ввод числовых значений."
             return render_template("result.html", result=result_data)
@@ -235,9 +235,9 @@ def result():
     elif task_type == "2":
         system_choice = request.form.get("system_choice")
         try:
-            x0 = float(request.form.get("x0"))
-            y0 = float(request.form.get("y0"))
-            eps = float(request.form.get("eps_system"))
+            x0 = float(request.form.get("x0").replace(',', '.'))
+            y0 = float(request.form.get("y0").replace(',', '.'))
+            eps = float(request.form.get("eps_system").replace(',', '.'))
         except ValueError:
             result_data['error'] = "Некорректный ввод числовых значений."
             return render_template("result.html", result=result_data)
