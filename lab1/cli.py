@@ -137,11 +137,6 @@ def generate_random_matrix(size):
 
 def solve(matrix, eps):
     size = len(matrix)
-    for i in range(size):
-        if matrix[i][i] == 0:
-            print("Ошибка: нулевой элемент на диагонали. Невозможно решить.")
-            return None
-    
     x = [0.0] * size
     iter_counter = 0
     
@@ -227,6 +222,12 @@ def main():
             print("Диагонального преобладания не удалось достичь.")
             return
     
+    size = len(matrix)
+    for i in range(size):
+        if matrix[i][i] == 0:
+            print("Ошибка: нулевой элемент на диагонали. Невозможно решить.")
+            return
+
     result = solve(matrix, eps)
     if result is None:
         return
