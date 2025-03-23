@@ -58,7 +58,7 @@ def analyze_interval(f, f_prime, a, b):
         return True, "Внимание: возможно несколько корней!"
     return True, "Интервал корректен"
 
-def chord_method(f, a, b, eps, max_iter=1000):
+def chord_method(f, a, b, eps, max_iter=10000):
     fa, fb = f(a), f(b)
     iterations = 0
     for _ in range(max_iter):
@@ -73,7 +73,7 @@ def chord_method(f, a, b, eps, max_iter=1000):
             a, fa = c, fc
     return (a + b) / 2, iterations
 
-def newton_method(f, f_prime, x0, eps, max_iter=1000):
+def newton_method(f, f_prime, x0, eps, max_iter=10000):
     x = x0
     for i in range(max_iter):
         fx = f(x)
@@ -88,7 +88,7 @@ def newton_method(f, f_prime, x0, eps, max_iter=1000):
         x = x_new
     return x, max_iter
 
-def simple_iteration_method(f, f_prime, a, b, eps, max_iter=1000):
+def simple_iteration_method(f, f_prime, a, b, eps, max_iter=10000):
     df_a = abs(f_prime(a))
     df_b = abs(f_prime(b))
     max_df = max(df_a, df_b)
@@ -96,10 +96,10 @@ def simple_iteration_method(f, f_prime, a, b, eps, max_iter=1000):
     if max_df == 0:
         raise ValueError("Производная на интервале равна нулю, метод неприменим")
 
-    if f_prime(a) > 0 and f_prime(b) > 0:
-        lambda_ = -1 / max_df
-    elif f_prime(a) < 0 and f_prime(b) < 0:
+    if f_prime(a) <= 0 and f_prime(b) <= 0:
         lambda_ = 1 / max_df
+    elif f_prime(a) >= 0 and f_prime(b) >= 0:
+        lambda_ = -1 / max_df
     else:
         raise ValueError("Производная меняет знак на интервале, метод может не сходиться")
 
@@ -113,7 +113,6 @@ def simple_iteration_method(f, f_prime, a, b, eps, max_iter=1000):
     return x_prev, max_iter
 
 
-# Функции для систем нелинейных уравнений
 systems = {
     "1": {
         'g1': lambda x, y: 0.3 - 0.1 * y**2,
