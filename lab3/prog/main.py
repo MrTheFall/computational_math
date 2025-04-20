@@ -192,22 +192,23 @@ def main():
     
     print("\nВведите интервал интегрирования [a, b] (требуется b > a):")
     a = get_float("Введите значение a: ", error_message="Введите корректное число.")
-    b = get_float("Введите значение b: ", condition=lambda x: x > a, error_message="b должно быть больше a.")
-    
-    e = get_float("Введите точность (0 < e < 1): ", condition=lambda x: 0 < x < 1,
-                  error_message="Точность должна быть числом в диапазоне (0, 1).")
-    
+    b = get_float("Введите значение b: ", condition=lambda x: x > a, error_message="b должно быть больше a.")    
     func, integ = functions_list[s]
     if func.discontinuity is not None:
-        EPSILON = get_float("Введите значение отступа от разрыва: ", error_message="Введите корректное число.")
         if a == func.discontinuity:
-            a += EPSILON
-            print(f"Точка a совпадает с точкой разрыва. Установлено a = {a}")
+            print(f"Точка a совпадает с точкой разрыва.")
+            return
         if b == func.discontinuity:
-            b -= EPSILON
-            print(f"Точка b совпадает с точкой разрыва. Установлено b = {b}")
+            print(f"Точка b совпадает с точкой разрыва.")
+            return
+
+    e = get_float("Введите точность (0 < e < 1): ", condition=lambda x: 0 < x < 1,
+              error_message="Точность должна быть числом в диапазоне (0, 1).")
+
     segments = []
     if func.discontinuity is not None and a < func.discontinuity < b:
+        EPSILON = get_float("Введите значение отступа от разрыва: ", condition=lambda e: 0 < e < 1,
+              error_message="Введите корректное число в диапазоне (0, 1).")
         c = func.discontinuity
         if func.symmetric:
             delta = min(c - a, b - c)

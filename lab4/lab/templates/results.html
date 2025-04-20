@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Approximation Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Approximation Results</h1>
+        {% if plot_url %}
+        <div class="plot">
+            <img src="data:image/png;base64,{{ plot_url }}" alt="Approximation Plot">
+        </div>
+        {% endif %}
+        {% for res in results %}
+        <div class="model">
+            <h2>{{ res.name|capitalize }} Model</h2>
+            <p>Coefficients: {{ res.coeffs }}</p>
+            <p>MSE: {{ "%.6f"|format(res.mse) }}{% if res.r2 is not none %}, R<sup>2</sup>: {{ "%.6f"|format(res.r2) }}{% endif %}</p>
+            {% if res.reliability %}
+            <p>Достоверность аппроксимации: {{ res.reliability }}</p>
+            {% endif %}
+            {% if res.pearson_r is not none %}
+            <p>Pearson r: {{ "%.6f"|format(res.pearson_r) }}, r<sup>2</sup>: {{ "%.6f"|format(res.pearson_r**2) }}</p>
+            {% endif %}
+            <table>
+                <thead>
+                    <tr><th>x</th><th>y</th><th>y_pred</th><th>error</th></tr>
+                </thead>
+                <tbody>
+                    {% for x,y,yp,err in res.data %}
+                    <tr>
+                        <td>{{ "%.4f"|format(x) }}</td>
+                        <td>{{ "%.4f"|format(y) }}</td>
+                        <td>{{ "%.4f"|format(yp) }}</td>
+                        <td>{{ "%.4f"|format(err) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+        <div class="back">
+            <a href="{{ url_for('index') }}">← Back to input</a>
+        </div>
+        <div class="download">
+            <button id="download-btn">Скачать результаты</button>
+        </div>
+    </div>
+    <script>
+        const resultsData = {{ results|tojson }};
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const dataStr = JSON.stringify(resultsData, null, 4);
+            const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.href = url;
+            a.download = `results_${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
