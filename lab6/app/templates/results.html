@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты решения ОДУ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты решения ОДУ y' = {{ ode_str }}</h1>
+        <p><strong>Метод:</strong> {{ method_name }}</p>
+        <p><strong>Погрешность по Рунге:</strong> {{ "%.6e"|format(error) }}</p>
+        <p><strong>Заданная точность (eps):</strong> {{ eps }}</p>
+        <p><strong>Условие выполняется:</strong> {% if error <= eps %}<span class="success">Да</span>{% else %}<span class="error">Нет</span>{% endif %}</p>
+        {% if plot_url %}
+        <div class="plot">
+            <img src="data:image/png;base64,{{ plot_url }}" alt="Solution Plot">
+        </div>
+        {% endif %}
+        <div class="download">
+            <button id="download-btn" data-results='{{ {'ode_str': ode_str, 'method_name': method_name, 'error': error, 'eps': eps, 'values': values}|tojson }}'>Скачать результаты</button>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr><th>x</th><th>y</th></tr>
+                </thead>
+                <tbody>
+                {% for xi, yi in values %}
+                    <tr><td>{{ "%.6f"|format(xi) }}</td><td>{{ "%.6f"|format(yi) }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="back">
+            <a href="{{ url_for('index') }}">← Назад</a>
+        </div>
+    </div>
+    <script>
+        const btn = document.getElementById('download-btn');
+        const resultsData = JSON.parse(btn.getAttribute('data-results'));
+        btn.addEventListener('click', function() {
+            const dataStr = JSON.stringify(resultsData, null, 4);
+            const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ode_results_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html> 

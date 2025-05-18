@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Численное решение ОДУ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Численное решение ОДУ</h1>
+        <div class="demo-buttons" style="margin-bottom: 20px;">
+            <button type="button" id="demo-euler">Демо Эйлера</button>
+            <button type="button" id="demo-improved">Демо улучшенного Эйлера</button>
+            <button type="button" id="demo-adams">Демо Адамса</button>
+        </div>
+        <form action="{{ url_for('results') }}" method="post">
+            <div class="form-group">
+                <label for="ode">Выберите ОДУ:</label>
+                <select id="ode" name="ode" required>
+                    <option value="">--Выберите--</option>
+                    <option value="1">x - 2*y</option>
+                    <option value="2">x * y</option>
+                    <option value="3">sin(x)</option>
+                    <option value="4">y</option>
+                    <option value="5">y*(1-y)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="x0">Начальный x (x0):</label>
+                <input id="x0" type="number" name="x0" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="xn">Конечный x (xn):</label>
+                <input id="xn" type="number" name="xn" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="n">Количество шагов (n):</label>
+                <input id="n" type="number" name="n" step="1" min="1" required onkeydown="return event.key.toLowerCase() !== 'e';" oninput="this.value = this.value.replace(/[eE]/g, '')">
+            </div>
+            <div class="form-group">
+                <label for="y0">Начальное y (y0):</label>
+                <input id="y0" type="number" name="y0" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="method">Метод:</label>
+                <select id="method" name="method" required>
+                    <option value="">--Выберите--</option>
+                    <option value="euler">Метод Эйлера</option>
+                    <option value="improved">Усовершенствованный метод Эйлера</option>
+                    <option value="adams">Метод Адамса</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="eps">Точность (eps):</label>
+                <input id="eps" type="number" name="eps" step="any" required>
+            </div>
+            <button type="submit" class="btn-submit">Вычислить</button>
+        </form>
+    </div>
+    <script>
+        function fillDemo(settings) {
+            document.getElementById('ode').value = settings.ode;
+            document.getElementById('x0').value = settings.x0;
+            document.getElementById('xn').value = settings.xn;
+            document.getElementById('n').value = settings.n;
+            document.getElementById('y0').value = settings.y0;
+            document.getElementById('method').value = settings.method;
+            document.getElementById('eps').value = settings.eps;
+        }
+        document.getElementById('demo-euler').addEventListener('click', function() {
+            // Демонстрация метода Эйлера для задачи y' = x - 2*y
+            fillDemo({ ode: '1', x0: 0, xn: 2, n: 100, y0: 1, method: 'euler', eps: 0.001 });
+        });
+        document.getElementById('demo-improved').addEventListener('click', function() {
+            // Демонстрация улучшенного метода Эйлера для задачи y' = x * y
+            fillDemo({ ode: '2', x0: 0, xn: 3, n: 300, y0: 0.001, method: 'improved', eps: 0.001 });
+        });
+        document.getElementById('demo-adams').addEventListener('click', function() {
+            // Демонстрация метода Адамса для логистического уравнения y' = y*(1-y)
+            fillDemo({ ode: '3', x0: 3, xn: 10, n: 250, y0: -0.5, method: 'adams', eps: 0.01 });
+        });
+    </script>
+</body>
+</html> 

@@ -65,7 +65,6 @@ def fit_power(x, y):
 
 
 def solve_least_squares(X, y):
-    """Решение системы уравнений методом наименьших квадратов"""
     Xt = transpose(X)
     XtX = multiply_matrix(Xt, X)
     XtY = multiply_matrix_vector(Xt, y)
@@ -73,12 +72,10 @@ def solve_least_squares(X, y):
 
 
 def transpose(matrix):
-    """Транспонирование матрицы"""
     return [list(row) for row in zip(*matrix)]
 
 
 def multiply_matrix(a, b):
-    """Умножение двух матриц"""
     m, k = len(a), len(a[0])
     n = len(b[0])
     result = [[0.0] * n for _ in range(m)]

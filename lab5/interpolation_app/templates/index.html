@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interpolation Input</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Методы интерполяции</h1>
+        <form id="pointsForm" action="{{ url_for('results') }}" method="post">
+            <div class="axis-inputs">
+                <label> Точка интерполяции (x): <input type="number" name="x_input" id="x_input" step="any" required></label>
+            </div>
+            <div class="axis-inputs">
+                <label> X min: <input type="number" id="xmin" value="0" step="any"></label>
+                <label> X max: <input type="number" id="xmax" value="10" step="any"></label>
+                <label> Y min: <input type="number" id="ymin" value="0" step="any"></label>
+                <label> Y max: <input type="number" id="ymax" value="10" step="any"></label>
+                <button type="button" id="drawAxes">Нарисовать оси</button>
+            </div>
+            <div id="plotContainer">
+                <canvas id="plotCanvas" width="500" height="500" style="border:1px solid #ccc; display:block; margin:10px 0;"></canvas>
+            </div>
+            <div class="manual-input">
+                <label>Ручной ввод (x y per line):<br>
+                    <textarea id="textInput" rows="5" cols="30" placeholder="e.g. 1 2&#10;3 4"></textarea>
+                </label>
+            </div>
+            <div class="file-input">
+                <label>Ввод с файла:<br>
+                    <input type="file" id="fileInput" accept=".txt">
+                </label>
+            </div>
+            <div class="function-input">
+                <label>Выбор функции:
+                    <select name="func_select" id="func_select">
+                        <option value="">--Select--</option>
+                        <option value="sin">sin(x)</option>
+                        <option value="cos">cos(x)</option>
+                        <option value="x3">x^3</option>
+                        <option value="x2_7x">x^2 - 7x</option>
+                    </select>
+                </label>
+                <label>Начало: <input type="number" id="interval_start" step="any"></label>
+                <label>Конец: <input type="number" id="interval_end" step="any"></label>
+                <br>
+                <label>Количество точек: <input type="number" id="num_points" min="2" value="2"></label>
+                <button type="button" id="generatePoints">Сгенерировать точки</button>
+            </div>
+            <button type="button" id="clearAll">Очистить всё</button>
+            <input type="hidden" name="data" id="dataInput">
+            <button type="submit">Интерполировать</button>
+        </form>
+        <script>
+            const canvas = document.getElementById('plotCanvas');
+            const ctx = canvas.getContext('2d');
+            let points = [];
+            function drawAxes() {
+                const xmin = parseFloat(document.getElementById('xmin').value);
+                const xmax = parseFloat(document.getElementById('xmax').value);
+                const ymin = parseFloat(document.getElementById('ymin').value);
+                const ymax = parseFloat(document.getElementById('ymax').value);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+                const y0 = canvas.height * (ymax / (ymax - ymin));
+                ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(canvas.width, y0); ctx.stroke();
+                const x0 = canvas.width * (-xmin / (xmax - xmin));
+                ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, canvas.height); ctx.stroke();
+                points = [];
+                document.getElementById('dataInput').value = '';
+            }
+            function canvasClick(evt) {
+                const rect = canvas.getBoundingClientRect();
+                const xmin = parseFloat(document.getElementById('xmin').value);
+                const xmax = parseFloat(document.getElementById('xmax').value);
+                const ymin = parseFloat(document.getElementById('ymin').value);
+                const ymax = parseFloat(document.getElementById('ymax').value);
+                const xpix = evt.clientX - rect.left;
+                const ypix = evt.clientY - rect.top;
+                const xval = xmin + xpix / canvas.width * (xmax - xmin);
+                const yval = ymax - ypix / canvas.height * (ymax - ymin);
+                points.push({x: xval, y: yval});
+                ctx.fillStyle = 'red';
+                ctx.beginPath(); ctx.arc(xpix, ypix, 4, 0, 2*Math.PI); ctx.fill();
+                const dataStr = points.map(p=>p.x.toFixed(4)+' '+p.y.toFixed(4)).join('\n');
+                document.getElementById('dataInput').value = dataStr;
+            }
+            document.getElementById('drawAxes').addEventListener('click', drawAxes);
+            canvas.addEventListener('click', canvasClick);
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0]; if (!file) return;
+                document.getElementById('fileInput').value = '';
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const text = evt.target.result.trim();
+                    const lines = text.split(/\r?\n/);
+                    const validLines = lines.filter(line => {
+                        const parts = line.trim().split(/\s+/);
+                        return parts.length === 2 && !isNaN(parseFloat(parts[0].replace(',', '.')))
+                            && !isNaN(parseFloat(parts[1].replace(',', '.')));
+                    });
+                    if (validLines.length === 0) { alert('File contains no valid points!'); return; }
+                    drawAxes();
+                    const xmin = parseFloat(document.getElementById('xmin').value);
+                    const xmax = parseFloat(document.getElementById('xmax').value);
+                    const ymin = parseFloat(document.getElementById('ymin').value);
+                    const ymax = parseFloat(document.getElementById('ymax').value);
+                    validLines.forEach(line => {
+                        const parts = line.trim().split(/\s+/);
+                        const x = parseFloat(parts[0].replace(',', '.'));
+                        const y = parseFloat(parts[1].replace(',', '.'));
+                        points.push({ x, y });
+                        const xpix = (x - xmin) / (xmax - xmin) * canvas.width;
+                        const ypix = (ymax - y) / (ymax - ymin) * canvas.height;
+                        ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(xpix, ypix, 4, 0, 2 * Math.PI); ctx.fill();
+                    });
+                    document.getElementById('dataInput').value = validLines.join('\n');
+                    document.getElementById('textInput').value = validLines.join('\n');
+                };
+                reader.readAsText(file);
+            });
+            document.getElementById('pointsForm').addEventListener('submit', function(e) {
+                const text = document.getElementById('textInput').value.trim();
+                if (text) { document.getElementById('dataInput').value = text; }
+                const dataStr = document.getElementById('dataInput').value.trim();
+                if (!dataStr) { alert('Please enter at least two points.'); e.preventDefault(); return; }
+                const lines = dataStr.split('\n');
+                const seenX = new Set(); // Track unique x-values
+                const validLines = lines.filter(line => {
+                    const parts = line.trim().split(/\s+/);
+                    if (parts.length !== 2) return false;
+                    
+                    // Convert commas to dots and parse numbers
+                    const xStr = parts[0].replace(/,/g, '.');
+                    const yStr = parts[1].replace(/,/g, '.');
+                    const x0 = parseFloat(xStr);
+                    const y0 = parseFloat(yStr);
+                    
+                    // Validate numbers and check for duplicate x
+                    if (isNaN(x0) || isNaN(y0)) return false;
+                    if (seenX.has(x0)) return false; // Skip duplicates
+                    
+                    seenX.add(x0); // Record new x-value
+                    return true;
+                });
+
+                if (validLines.length < 2) {
+                    alert('Need at least two valid points with unique x-values.');
+                    e.preventDefault();
+                    return;
+                }
+                document.getElementById('dataInput').value = validLines.join('\n');
+            });
+            drawAxes();
+        </script>
+        <script>
+            document.getElementById('generatePoints').addEventListener('click', function() {
+                const func = document.getElementById('func_select').value;
+                const start = parseFloat(document.getElementById('interval_start').value);
+                const end = parseFloat(document.getElementById('interval_end').value);
+                const num = parseInt(document.getElementById('num_points').value);
+                if (!func || isNaN(start) || isNaN(end) || isNaN(num) || num < 2 || end <= start) {
+                    alert('Please select a function and valid interval/number of points (>=2).');
+                    return;
+                }
+                const xsFunc = [];
+                const ysFunc = [];
+                const step = (end - start) / (num - 1);
+                for (let i = 0; i < num; i++) {
+                    const x = start + i * step;
+                    xsFunc.push(x);
+                    let y;
+                    if (func === 'sin') {
+                        y = Math.sin(x);
+                    } else if (func === 'cos') {
+                        y = Math.cos(x);
+                    } else if (func === 'x3') {
+                        y = Math.pow(x, 3);
+                    } else if (func === 'x2_7x') {
+                        y = Math.pow(x, 2) - 7 * x;
+                    }
+                    ysFunc.push(y);
+                }
+                drawAxes();
+                points = [];
+                for (let i = 0; i < xsFunc.length; i++) {
+                    const x = xsFunc[i], y = ysFunc[i];
+                    points.push({ x, y });
+                    const xmin = parseFloat(document.getElementById('xmin').value);
+                    const xmax = parseFloat(document.getElementById('xmax').value);
+                    const ymin = parseFloat(document.getElementById('ymin').value);
+                    const ymax = parseFloat(document.getElementById('ymax').value);
+                    const xpix = (x - xmin) / (xmax - xmin) * canvas.width;
+                    const ypix = (ymax - y) / (ymax - ymin) * canvas.height;
+                    ctx.fillStyle = 'blue';
+                    ctx.beginPath(); ctx.arc(xpix, ypix, 4, 0, 2 * Math.PI); ctx.fill();
+                }
+                const dataStr = points.map(p=>p.x.toFixed(4)+' '+p.y.toFixed(4)).join('\n');
+                document.getElementById('dataInput').value = dataStr;
+                document.getElementById('textInput').value = dataStr;
+            });
+            document.getElementById('clearAll').addEventListener('click', function() {
+                drawAxes();
+                document.getElementById('textInput').value = '';
+                document.getElementById('dataInput').value = '';
+                document.getElementById('func_select').value = '';
+                document.getElementById('interval_start').value = '';
+                document.getElementById('interval_end').value = '';
+                document.getElementById('num_points').value = '2';
+            });
+        </script>
+    </div>
+</body>
+</html>

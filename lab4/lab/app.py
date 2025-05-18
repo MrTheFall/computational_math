@@ -34,7 +34,6 @@ def results():
         if len(parts) != 2:
             continue
         try:
-            # Поддержка запятой в дробных числах
             x_val = float(parts[0].replace(',', '.'))
             y_val = float(parts[1].replace(',', '.'))
             points.append((x_val, y_val))
@@ -70,7 +69,6 @@ def results():
             ss_tot = sum((y - y_mean)**2 for y in ys)
             r2 = 1 - ss_res / ss_tot if ss_tot != 0 else None
             pearson_r = calculate_pearson_correlation(xs, ys) if name == 'linear' else None
-            # Определение достоверности аппроксимации
             if r2 is not None:
                 if r2 >= 0.95:
                     reliability = 'Высокая точность аппроксимации (модель хорошо описывает явление)'
@@ -91,11 +89,12 @@ def results():
                 'pearson_r': pearson_r,
                 'data': list(zip(xs, ys, y_pred, errors))
             })
-        # Фильтрация по лучшей модели, если запрошено
         if best_only and results:
-            best = max(results, key=lambda r: r['r2'] if r['r2'] is not None else float('-inf'))
+            print(results[0])
+            #best = max(results, key=lambda r: r['r2'] if r['r2'] is not None else float('-inf'))
+            best = min(results, key=lambda r: r['mse'] if r['mse'] is not None else float('-inf'))
             results = [best]
-    # Построение графика
+    # график
     plot_url = None
     if xs and ys and results:
         x_min, x_max = min(xs), max(xs)
