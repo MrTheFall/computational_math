@@ -88,8 +88,8 @@ def results():
                 continue
             if func is newton_divided_difference_polynomial and finite_difference:
                 continue
-            # if (func is gauss_polynomial or func is stirling_polynomial) and len(xs) % 2 == 0:
-            #     continue
+            if (func is gauss_polynomial or func is stirling_polynomial) and len(xs) % 2 == 0:
+                continue
             if func is bessel_polynomial and len(xs) % 2 == 1:
                 continue
             # compute t for the method

@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import math
-import matplotlib
 import matplotlib.pyplot as plt
 import io, base64
 
@@ -145,7 +144,7 @@ def results():
     plot_data = base64.b64encode(buf.getvalue()).decode('utf8')
     plt.close()
 
-    values = list(zip(xs, ys))
+    values = list(zip(xs, ys, y_exact))
     return render_template('results.html', method_name=method_name,
                            ode_str=ode_str, error=error,
                            eps=eps, values=values,

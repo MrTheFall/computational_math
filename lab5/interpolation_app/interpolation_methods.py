@@ -46,7 +46,7 @@ def finite_differences(y):
     return delta_y
 
 def newton_finite_difference_polynomial(xs, ys, n):
-    h = xs[1] - xs[0]  # работает только для равноотстоящих узлов!
+    h = xs[1] - xs[0]
     delta_y = finite_differences(ys)
     return lambda x: ys[0] + sum(
         product([(x - xs[0]) / h - j for j in range(k)]) * delta_y[0][k] / factorial(k)
